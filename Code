@@ -1,0 +1,33 @@
+import cv2
+import numpy as np
+
+# Load the green screen image and the background image
+green_screen_image = cv2.imread('green_screen_image.jpg')
+background_image = cv2.imread('background_image.jpg')
+
+# Convert the images to the same size
+background_image = cv2.resize(background_image, (green_screen_image.shape[1], green_screen_image.shape[0]))
+
+# Define the range of green color in HSV (Hue, Saturation, Value) space
+lower_green = np.array([40, 50, 50])
+upper_green = np.array([80, 255, 255])
+
+# Convert the green screen image to HSV color space
+hsv_image = cv2.cvtColor(green_screen_image, cv2.COLOR_BGR2HSV)
+
+# Create a mask based on the green color range
+mask = cv2.inRange(hsv_image, lower_green, upper_green)
+
+# Apply the mask to extract the foreground (green screen) from the image
+foreground = cv2.bitwise_and(green_screen_image, green_screen_image, mask=mask)
+
+# Inverse the mask to extract the background
+background = cv2.bitwise_and(background_image, background_image, mask=cv2.bitwise_not(mask))
+
+# Combine the foreground and background to create the final image
+result = cv2.add(foreground, background)
+
+# Display the result
+cv2.imshow('Green Screen Removal', result)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
